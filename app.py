@@ -5,7 +5,7 @@ Run:  streamlit run app.py
 
 import streamlit as st
 from molecules_db import REGISTRY, search
-from reactions import REACTION_REGISTRY, get_reactions_by_type, get_reactions_involving
+from reactions import REACTION_REGISTRY, get_reactions_involving
 
 st.set_page_config(
     page_title="Chemistry Reactions",
@@ -20,7 +20,7 @@ st.title("⚗️ Chemistry Reactions Explorer")
 # ------------------------------------------------------------------ #
 page = st.sidebar.radio(
     "Navigate",
-    ["🔍 Molecule Search", "⚗️ Reactions", "🧮 Stoichiometry Calculator"],
+    ["🔍 Molecule Search", "🧮 Stoichiometry Calculator"],
 )
 
 # ================================================================== #
@@ -109,46 +109,7 @@ if page == "🔍 Molecule Search":
                 st.caption("No reactions in library involve this molecule.")
 
 # ================================================================== #
-#  PAGE 2 — Reactions                                                 #
-# ================================================================== #
-elif page == "⚗️ Reactions":
-    st.header("⚗️ Reaction Library")
-
-    all_types = sorted({r.rxn_type for r in REACTION_REGISTRY.values()})
-    selected_types = st.multiselect(
-        "Filter by type", all_types, default=all_types
-    )
-
-    show_only_balanced = st.checkbox("Show only balanced reactions", value=False)
-
-    filtered = [
-        r for r in REACTION_REGISTRY.values()
-        if r.rxn_type in selected_types
-        and (not show_only_balanced or r.is_balanced)
-    ]
-
-    st.caption(f"{len(filtered)} reaction(s)")
-
-    for r in filtered:
-        label = f"**{r.name}**  `[{r.rxn_type}]`"
-        if r.delta_h is not None:
-            label += f"  ΔH = {r.delta_h:+.1f} kJ/mol"
-        with st.expander(label):
-            st.code(r.equation, language="")
-            cols = st.columns(3)
-            cols[0].metric("Type", r.rxn_type)
-            if r.delta_h is not None:
-                heat = "Exothermic 🔥" if r.delta_h < 0 else "Endothermic ❄️"
-                cols[1].metric("Energy", heat)
-            if r.conditions:
-                cols[2].metric("Conditions", r.conditions)
-            if r.description:
-                st.write(r.description)
-            balanced_label = "✅ Balanced" if r.is_balanced else "⚠️ Not balanced"
-            st.caption(balanced_label)
-
-# ================================================================== #
-#  PAGE 3 — Stoichiometry Calculator                                  #
+#  PAGE 2 — Stoichiometry Calculator                                  #
 # ================================================================== #
 elif page == "🧮 Stoichiometry Calculator":
     st.header("🧮 Stoichiometry Calculator")
